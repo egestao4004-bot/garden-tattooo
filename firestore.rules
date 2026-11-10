@@ -1,0 +1,74 @@
+rules_version = '2';
+// ============================================================
+// Regras de segurança — Garden Tattoo (Desenvolvido por Evander)
+// Perfis (coleção "acessos/{uid}", campo "papel"):
+//   admin     → tudo
+//   recepcao  → operação + contas a pagar/receber (sem configurações/equipe)
+//   artista   → operação do dia a dia; NÃO lê o financeiro
+// O público (sem login) só pode CRIAR fichas de anamnese.
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function equipe() {
+      return request.auth != null && exists(/databases/$(database)/documents/acessos/$(request.auth.uid));
+    }
+    function papel() {
+      return get(/databases/$(database)/documents/acessos/$(request.auth.uid)).data.papel;
+    }
+    function admin() { return equipe() && papel() == 'admin'; }
+    function gestao() { return equipe() && (papel() == 'admin' || papel() == 'recepcao' || papel() == 'equipe'); }
+
+    // Liberação de usuários (o admin cria pela tela "Usuários & Acessos")
+    match /acessos/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || admin());
+      allow write: if admin();
+    }
+
+    // Dados públicos do estúdio (nome, Instagram) para o cabeçalho da ficha
+    match /publico/{doc} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    // Configurações e cadastros sensíveis: só o admin altera
+    match /config/{doc} { allow read: if equipe(); allow write: if admin(); }
+    match /profissionais/{id} { allow read: if equipe(); allow write: if admin(); }
+    match /servicos/{id} { allow read: if equipe(); allow write: if admin(); }
+
+    // Financeiro: qualquer membro gera lançamentos ao registrar atendimento/venda,
+    // mas só admin e recepção leem, editam ou excluem
+    match /lancamentos/{id} {
+      allow create: if equipe();
+      allow read, update, delete: if gestao();
+    }
+
+    // Ficha de anamnese: qualquer pessoa com o link pode ENVIAR, só a equipe lê
+    match /anamneses/{id} {
+      allow create: if (equipe()) || (
+        request.resource.data.status == 'nova'
+        && request.resource.data.id == id
+        && request.resource.data.nome is string && request.resource.data.nome.size() > 3 && request.resource.data.nome.size() <= 200
+        && request.resource.data.aceiteTermos == true && request.resource.data.aceiteLGPD == true
+        && request.resource.data.assinatura is string && request.resource.data.assinatura.size() < 400000
+        && request.resource.data.keys().hasOnly(['id','status','criadoEm','origem','clienteId','nome','cpf','nasc','telefone','email','instagram','endereco',
+             'contatoEmergencia','responsavel','responsavelCpf','responsavelParentesco','tipoProcedimento','regiao','profissionalTxt','descricaoProc',
+             'respostas','detalhes','obs','aceiteTermos','aceiteLGPD','autorizaImagem','assinatura','userAgent'])
+      );
+      allow read, update: if equipe();
+      allow delete: if gestao();
+    }
+
+    // Fotos (comprimidas, até ~700 KB cada): equipe envia e vê; só gestão exclui
+    match /fotos/{id} {
+      allow read, create: if equipe();
+      allow update, delete: if gestao();
+    }
+
+    // Demais coleções do sistema (clientes, agenda, atendimentos, estoque,
+    // esterilizações, orçamentos, projetos, vendas, movimentações)
+    match /{col}/{docId} {
+      allow read, write: if equipe() && !(col in ['acessos', 'anamneses', 'publico', 'config', 'profissionais', 'servicos', 'lancamentos', 'fotos']);
+    }
+  }
+}

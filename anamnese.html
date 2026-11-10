@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="theme-color" content="#0b0b0d">
+  <title>Ficha de Anamnese — Garden Tattoo</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{background:linear-gradient(180deg,rgba(8,14,10,.45),rgba(8,14,10,.93) 420px),url('img/bg.jpg') center top/cover no-repeat fixed,var(--bg);min-height:100vh}
+    .head img{width:120px;height:120px;border-radius:50%;display:block;margin:0 auto 12px;box-shadow:0 0 0 3px rgba(227,217,194,.12),0 0 50px rgba(224,191,110,.35)}
+    .wrap .card{background:rgba(20,32,25,.9);backdrop-filter:blur(8px)}
+    .sign{position:static;display:block;text-align:center;padding:0 0 24px}
+    .wrap{max-width:720px;margin:0 auto;padding:28px 16px 80px}
+    .head{text-align:center;margin-bottom:22px}
+    .head .logo{font-family:var(--disp);font-size:30px;font-weight:700;letter-spacing:4px;line-height:1.1;color:var(--stone)}
+    .head p{color:var(--muted);font-size:13px;margin-top:6px}
+    .steps{display:flex;gap:6px;margin-bottom:18px}
+    .steps i{flex:1;height:4px;border-radius:4px;background:var(--line);transition:.3s}
+    .steps i.on{background:var(--acc)}
+    .step{display:none}.step.on{display:block;animation:pop .25s}
+    .card h2{font-size:18px;margin-bottom:4px}.card .lead{color:var(--muted);font-size:13px;margin-bottom:16px}
+    .q{padding:12px 0;border-bottom:1px solid #23232b}
+    .q .top{display:flex;gap:12px;align-items:center}
+    .q .top span{flex:1;font-size:14px}
+    .yn{display:flex;gap:6px;flex:none}
+    .yn label{cursor:pointer}
+    .yn input{display:none}
+    .yn b{display:inline-block;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);font-size:13px;font-weight:600;color:var(--muted)}
+    .yn input:checked+b.s{background:var(--warn);border-color:var(--warn);color:#1b1608}
+    .yn input:checked+b.n{background:#2d4a33;border-color:#4d7a52;color:#fff}
+    .q .det{margin-top:8px;display:none}.q.sim .det{display:block}
+    .choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .choice label{cursor:pointer}.choice input{display:none}
+    .choice div{border:1px solid var(--line);background:var(--bg2);border-radius:12px;padding:16px;text-align:center;font-weight:700;transition:.15s}
+    .choice div small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:3px}
+    .choice input:checked+div{border-color:var(--acc);background:var(--accbg)}
+    .terms{max-height:220px;overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:12.5px;color:#c9c9d4;line-height:1.55}
+    .terms h4{color:#fff;margin:10px 0 4px;font-size:13px}.terms h4:first-child{margin-top:0}
+    .chk{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:13.5px;cursor:pointer}
+    .chk input{margin-top:3px;width:18px;height:18px;flex:none}
+    #sig{width:100%;height:200px;background:#fff;border-radius:10px;touch-action:none;cursor:crosshair;display:block}
+    .nav-btns{display:flex;gap:10px;margin-top:16px}.nav-btns .btn{flex:1;justify-content:center;padding:13px}
+    .done{text-align:center;padding:40px 20px}.done .big{font-size:60px}
+    @media(max-width:520px){.q .top{flex-direction:column;align-items:flex-start}.choice{grid-template-columns:1fr}}
+  </style>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    if (window.FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
+      ['app', 'firestore'].forEach(m => document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-' + m + '-compat.js"><\/script>'));
+    }
+  </script>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><img src="img/logo.png" alt=""><div class="logo" id="stNome">GARDEN TATTOO</div><p id="stInfo">Preencha com atenção — suas respostas garantem um procedimento seguro.</p></div>
+  <div class="steps" id="steps"><i class="on"></i><i></i><i></i><i></i></div>
+  <form id="F" autocomplete="on" novalidate>
+
+    <!-- 1. DADOS -->
+    <section class="step on" data-s="0"><div class="card">
+      <h2>1. Seus dados</h2><p class="lead">Informações pessoais para o cadastro no estúdio.</p>
+      <div class="fg">
+        <div class="f c12"><label>Nome completo *</label><input name="nome" required autocomplete="name"></div>
+        <div class="f c6"><label>CPF *</label><input name="cpf" inputmode="numeric" placeholder="000.000.000-00" required></div>
+        <div class="f c6"><label>Data de nascimento *</label><input type="date" name="nasc" required></div>
+        <div class="f c6"><label>WhatsApp *</label><input name="telefone" inputmode="tel" placeholder="(00) 00000-0000" required autocomplete="tel"></div>
+        <div class="f c6"><label>E-mail</label><input type="email" name="email" autocomplete="email"></div>
+        <div class="f c6"><label>Instagram</label><input name="instagram" placeholder="@usuario"></div>
+        <div class="f c6"><label>Contato de emergência (nome e telefone) *</label><input name="contatoEmergencia" required></div>
+        <div class="f c12"><label>Endereço</label><input name="endereco" autocomplete="street-address"></div>
+        <div class="c12" id="menorBox" style="display:none">
+          <div class="alert bad">⚠ Menores de 18 anos só podem realizar procedimentos com autorização e <b>presença do responsável legal</b>, que deve preencher os dados abaixo.</div>
+          <div class="fg mt"><div class="f c6"><label>Nome do responsável legal *</label><input name="responsavel"></div><div class="f c6"><label>CPF do responsável *</label><input name="responsavelCpf" inputmode="numeric"></div><div class="f c12"><label>Grau de parentesco *</label><input name="responsavelParentesco" placeholder="Mãe, pai, tutor..."></div></div>
+        </div>
+      </div>
+    </div></section>
+
+    <!-- 2. PROCEDIMENTO -->
+    <section class="step" data-s="1"><div class="card">
+      <h2>2. Procedimento</h2><p class="lead">O que você vai fazer no estúdio?</p>
+      <div class="choice">
+        <label><input type="radio" name="tipoProcedimento" value="tattoo" checked><div>🌿 Tatuagem<small>tattoo, retoque ou cobertura</small></div></label>
+        <label><input type="radio" name="tipoProcedimento" value="piercing"><div>💎 Piercing<small>perfuração ou troca de joia</small></div></label>
+      </div>
+      <div class="fg mt">
+        <div class="f c6"><label>Região do corpo</label><input name="regiao" placeholder="Ex.: antebraço, orelha, nariz"></div>
+        <div class="f c6"><label>Profissional (se souber)</label><input name="profissionalTxt"></div>
+        <div class="f c12"><label>Descreva brevemente</label><textarea name="descricaoProc" placeholder="Ex.: rosa fine line com nome, ~8cm"></textarea></div>
+      </div>
+    </div></section>
+
+    <!-- 3. SAÚDE -->
+    <section class="step" data-s="2"><div class="card">
+      <h2>3. Questionário de saúde</h2><p class="lead">Responda todas as perguntas. As informações são sigilosas e usadas apenas para sua segurança.</p>
+      <div id="qs"></div>
+      <div class="f mt"><label>Mais alguma informação de saúde que devemos saber?</label><textarea name="obs"></textarea></div>
+    </div></section>
+
+    <!-- 4. TERMOS E ASSINATURA -->
+    <section class="step" data-s="3"><div class="card">
+      <h2>4. Termo de consentimento</h2><p class="lead">Leia com atenção antes de assinar.</p>
+      <div class="terms" id="termos"></div>
+      <label class="chk"><input type="checkbox" name="aceiteTermos"> <span>Declaro que <b>todas as informações acima são verdadeiras</b>, que li e concordo com o termo de consentimento e que recebi as orientações de cuidados pós-procedimento. *</span></label>
+      <label class="chk"><input type="checkbox" name="aceiteLGPD"> <span>Autorizo o estúdio a armazenar e tratar meus dados pessoais e de saúde exclusivamente para fins de atendimento, segurança e cumprimento de obrigações sanitárias, conforme a <b>LGPD (Lei 13.709/2018)</b>. *</span></label>
+      <label class="chk"><input type="checkbox" name="autorizaImagem"> <span>Autorizo o uso de fotos do trabalho realizado (sem exposição do meu rosto, salvo autorização) nas redes sociais e portfólio do estúdio. <i class="muted">(opcional)</i></span></label>
+      <div class="f mt"><label>Assinatura * <a href="#" id="sigClr" style="float:right">limpar</a></label><canvas id="sig"></canvas><span class="help">Assine com o dedo ou o mouse dentro do quadro branco</span></div>
+    </div></section>
+
+    <div class="nav-btns"><button type="button" class="btn" id="bPrev" style="display:none">Voltar</button><button type="button" class="btn pri" id="bNext">Continuar</button></div>
+    <div id="err" class="mt"></div>
+  </form>
+  <div id="done" style="display:none" class="card done"><img src="img/logo.png" style="width:110px;border-radius:50%"><h2 style="margin:10px 0">Ficha enviada com sucesso!</h2><p class="muted">Obrigado! Suas informações já estão com o estúdio. Até breve.</p><p class="muted small mt" id="doneInfo"></p></div>
+  <p class="small muted" style="text-align:center;margin-top:24px">🔒 Seus dados são protegidos e acessados apenas pela equipe do estúdio.</p>
+</div>
+<div class="sign">Desenvolvido por <b>Evander</b></div>
+
+<script src="js/db.js"></script>
+<script src="js/ui.js"></script>
+<script>
+(function () {
+  const P = new URLSearchParams(location.search);
+  const F = document.getElementById('F');
+  let step = 0, studio = { nome: '', telefone: '', instagram: '' }, fs = null;
+
+  // ---------- Conexão ----------
+  const fb = window.FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && window.firebase;
+  if (fb) {
+    firebase.initializeApp(FIREBASE_CONFIG); fs = firebase.firestore();
+    fs.collection('publico').doc('studio').get().then(d => { if (d.exists) { studio = d.data(); head(); } }).catch(() => {});
+  } else {
+    try { const raw = JSON.parse(localStorage.getItem(LS_KEY)); if (raw && raw.config) studio = raw.config; } catch (e) {}
+  }
+  function head() {
+    if (studio.nome) { document.getElementById('stNome').textContent = studio.nome.toUpperCase(); document.title = 'Ficha de Anamnese — ' + studio.nome; }
+    document.getElementById('stInfo').innerHTML = 'Ficha de Anamnese' + (studio.instagram ? ' · ' + esc(studio.instagram) : '') + '<br>Preencha com atenção — suas respostas garantem um procedimento seguro.';
+    renderTermos();
+  }
+
+  // ---------- Pré-preenchimento ----------
+  if (P.get('n')) F.nome.value = P.get('n');
+
+  // ---------- Perguntas ----------
+  document.getElementById('qs').innerHTML = ANAMNESE_PERGUNTAS.map(q => `<div class="q" data-q="${q.id}"><div class="top"><span>${q.txt}</span><div class="yn">
+    <label><input type="radio" name="r_${q.id}" value="sim"><b class="s">Sim</b></label><label><input type="radio" name="r_${q.id}" value="nao"><b class="n">Não</b></label></div></div>
+    ${q.det || q.alerta ? `<div class="det"><input name="d_${q.id}" placeholder="${q.det ? 'Qual? Especifique' : 'Detalhe (opcional)'}"></div>` : ''}</div>`).join('');
+  document.getElementById('qs').addEventListener('change', e => { const q = e.target.closest('.q'); if (q && e.target.type === 'radio') q.classList.toggle('sim', e.target.value === 'sim'); });
+
+  // ---------- Termos ----------
+  function renderTermos() {
+    const n = esc(studio.nome || 'o estúdio');
+    document.getElementById('termos').innerHTML = `
+      <h4>Consentimento</h4><p>Eu, abaixo assinado(a), autorizo ${n} a realizar o procedimento descrito nesta ficha. Estou ciente de que tatuagens e piercings são procedimentos invasivos, realizados com materiais descartáveis e/ou esterilizados, e que o resultado depende também das características da minha pele e dos cuidados que eu tiver durante a cicatrização.</p>
+      <h4>Riscos</h4><p>Fui informado(a) sobre possíveis reações como vermelhidão, inchaço, sensibilidade, pequenos sangramentos, reações alérgicas a pigmentos ou metais, infecção (em caso de cuidados inadequados), formação de queloide e alterações na cicatrização. Declaro não ter omitido nenhuma informação de saúde.</p>
+      <h4>Cuidados — Tatuagem</h4><p>Manter o curativo pelo tempo orientado; lavar com sabonete neutro e água corrente; secar com papel toalha; aplicar a pomada indicada em camada fina; não coçar nem retirar casquinhas; evitar sol, piscina, mar, sauna e banheira por no mínimo 15–30 dias; usar roupas leves sobre a região.</p>
+      <h4>Cuidados — Piercing</h4><p>Higienizar com soro fisiológico 2× ao dia; não girar nem trocar a joia antes da cicatrização completa; evitar maquiagem, cremes, piscina e mar na região; não dormir sobre o local; retornar ao estúdio em caso de dúvidas ou sinais de inflamação.</p>
+      <h4>Retoques</h4><p>Retoques necessários por falha na cicatrização serão avaliados pelo profissional. A não observância dos cuidados pode implicar cobrança.</p>
+      <h4>Proteção de dados</h4><p>Os dados desta ficha são armazenados de forma segura, acessíveis somente à equipe autorizada, mantidos pelo prazo exigido pela vigilância sanitária e não são compartilhados com terceiros. Você pode solicitar acesso, correção ou exclusão a qualquer momento pelo contato do estúdio${studio.telefone ? ' (' + esc(studio.telefone) + ')' : ''}.</p>`;
+  }
+  head();
+
+  // ---------- Menor de idade ----------
+  const idadeDe = v => { if (!v) return null; const n = new Date(v + 'T12:00'), h = new Date(); let a = h.getFullYear() - n.getFullYear(); if (h < new Date(h.getFullYear(), n.getMonth(), n.getDate())) a--; return a; };
+  F.nasc.addEventListener('change', () => { const i = idadeDe(F.nasc.value); document.getElementById('menorBox').style.display = i !== null && i < 18 ? 'block' : 'none'; });
+
+  // ---------- Máscaras ----------
+  const mask = (el, fn) => el.addEventListener('input', () => el.value = fn(el.value.replace(/\D/g, '')));
+  const cpfM = v => v.slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  mask(F.cpf, cpfM); mask(F.responsavelCpf, cpfM);
+  mask(F.telefone, v => v.slice(0, 11).replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2'));
+  const cpfOk = c => { c = c.replace(/\D/g, ''); if (c.length !== 11 || /^(\d)\1+$/.test(c)) return false; let s = 0; for (let i = 0; i < 9; i++) s += +c[i] * (10 - i); let d = (s * 10) % 11 % 10; if (d !== +c[9]) return false; s = 0; for (let i = 0; i < 10; i++) s += +c[i] * (11 - i); d = (s * 10) % 11 % 10; return d === +c[10]; };
+
+  // ---------- Assinatura ----------
+  const cv = document.getElementById('sig'), ctx = cv.getContext('2d'); let drawing = false, signed = false, last = null;
+  const fit = () => { const r = cv.getBoundingClientRect(); if (!r.width) return; const img = signed ? cv.toDataURL() : null; cv.width = r.width * 2; cv.height = r.height * 2; ctx.scale(2, 2); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111'; if (img) { const i = new Image(); i.onload = () => ctx.drawImage(i, 0, 0, r.width, r.height); i.src = img; } };
+  const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  cv.addEventListener('pointerdown', e => { drawing = true; last = pos(e); cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!drawing) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; signed = true; });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => drawing = false));
+  document.getElementById('sigClr').onclick = e => { e.preventDefault(); ctx.clearRect(0, 0, cv.width, cv.height); signed = false; };
+  window.addEventListener('resize', fit);
+
+  // ---------- Navegação ----------
+  const steps = [...document.querySelectorAll('.step')], bars = [...document.querySelectorAll('#steps i')];
+  const err = m => { document.getElementById('err').innerHTML = m ? `<div class="alert bad">${m}</div>` : ''; };
+  function validar(s) {
+    if (s === 0) {
+      if (!F.nome.value.trim() || F.nome.value.trim().split(' ').length < 2) return 'Informe seu nome completo.';
+      if (!cpfOk(F.cpf.value)) return 'CPF inválido.';
+      if (!F.nasc.value) return 'Informe a data de nascimento.';
+      if (F.telefone.value.replace(/\D/g, '').length < 10) return 'Informe um WhatsApp válido.';
+      if (!F.contatoEmergencia.value.trim()) return 'Informe um contato de emergência.';
+      const i = idadeDe(F.nasc.value); if (i < 0 || i > 110) return 'Data de nascimento inválida.';
+      if (i < 18 && (!F.responsavel.value.trim() || !cpfOk(F.responsavelCpf.value) || !F.responsavelParentesco.value.trim())) return 'Para menores de idade, preencha os dados do responsável legal (com CPF válido).';
+    }
+    if (s === 2) { const falt = ANAMNESE_PERGUNTAS.filter(q => !F.querySelector(`[name=r_${q.id}]:checked`)); if (falt.length) { F.querySelector(`[data-q=${falt[0].id}]`).scrollIntoView({ behavior: 'smooth', block: 'center' }); return `Responda todas as perguntas (${falt.length} sem resposta).`; } }
+    if (s === 3) { if (!F.aceiteTermos.checked || !F.aceiteLGPD.checked) return 'É necessário aceitar o termo e a autorização de dados.'; if (!signed) return 'Assine no quadro branco.'; }
+    return '';
+  }
+  function show(n) {
+    step = n; steps.forEach((s, i) => s.classList.toggle('on', i === n)); bars.forEach((b, i) => b.classList.toggle('on', i <= n));
+    document.getElementById('bPrev').style.display = n ? '' : 'none'; document.getElementById('bNext').textContent = n === 3 ? 'Enviar ficha ✓' : 'Continuar';
+    err(''); window.scrollTo({ top: 0, behavior: 'smooth' }); if (n === 3) setTimeout(fit, 50);
+  }
+  document.getElementById('bPrev').onclick = () => show(step - 1);
+  document.getElementById('bNext').onclick = async () => {
+    const e = validar(step); if (e) return err(e);
+    if (step < 3) return show(step + 1);
+    const btn = document.getElementById('bNext'); btn.disabled = true; btn.textContent = 'Enviando...';
+    const respostas = {}, detalhes = {};
+    ANAMNESE_PERGUNTAS.forEach(q => { respostas[q.id] = F.querySelector(`[name=r_${q.id}]:checked`).value; const d = F.querySelector(`[name=d_${q.id}]`); if (d && d.value.trim() && respostas[q.id] === 'sim') detalhes[q.id] = d.value.trim().slice(0, 300); });
+    const v = n => (F[n].value || '').trim().slice(0, 200);
+    const id = uid();
+    const doc = {
+      id, status: 'nova', criadoEm: new Date().toISOString(), origem: 'formulario-online',
+      clienteId: (P.get('c') || '').slice(0, 40), nome: v('nome'), cpf: v('cpf'), nasc: v('nasc'), telefone: v('telefone'), email: v('email'), instagram: v('instagram'),
+      endereco: v('endereco'), contatoEmergencia: v('contatoEmergencia'), responsavel: v('responsavel'), responsavelCpf: v('responsavelCpf'), responsavelParentesco: v('responsavelParentesco'),
+      tipoProcedimento: F.querySelector('[name=tipoProcedimento]:checked').value, regiao: v('regiao'), profissionalTxt: v('profissionalTxt'), descricaoProc: (F.descricaoProc.value || '').slice(0, 600),
+      respostas, detalhes, obs: (F.obs.value || '').slice(0, 1000), aceiteTermos: F.aceiteTermos.checked, aceiteLGPD: F.aceiteLGPD.checked, autorizaImagem: F.autorizaImagem.checked,
+      assinatura: cv.toDataURL('image/png'), userAgent: navigator.userAgent.slice(0, 200)
+    };
+    try {
+      if (fs) await fs.collection('anamneses').doc(id).set(doc);
+      else { const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); raw.anamneses = raw.anamneses || {}; raw.anamneses[id] = doc; localStorage.setItem(LS_KEY, JSON.stringify(raw)); }
+      F.style.display = 'none'; document.getElementById('steps').style.display = 'none'; document.getElementById('done').style.display = 'block';
+      document.getElementById('doneInfo').textContent = 'Protocolo: ' + id.slice(-8).toUpperCase() + ' · ' + new Date().toLocaleString('pt-BR');
+      window.scrollTo(0, 0);
+    } catch (ex) { console.error(ex); err('Não foi possível enviar. Verifique sua internet e tente novamente.'); btn.disabled = false; btn.textContent = 'Enviar ficha ✓'; }
+  };
+})();
+</script>
+</body>
+</html>

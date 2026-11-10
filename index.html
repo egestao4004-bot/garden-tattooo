@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b0d">
+  <meta name="author" content="Evander">
+  <title>Garden Tattoo — Gestão do Estúdio</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/firebase-config.js"></script>
+  <script>
+    // Carrega o SDK do Firebase somente se estiver configurado
+    if (window.FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
+      ['app', 'auth', 'firestore'].forEach(m => document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-' + m + '-compat.js"><\/script>'));
+    }
+  </script>
+</head>
+<body>
+  <div class="login"><div class="muted">Carregando...</div></div>
+  <script src="js/db.js"></script>
+  <script src="js/seed.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/views-operacao.js"></script>
+  <script src="js/views-cadastros.js"></script>
+  <script src="js/views-estoque.js"></script>
+  <script src="js/views-financeiro.js"></script>
+  <script src="js/views-extra.js"></script>
+</body>
+</html>
